@@ -41,11 +41,16 @@ For `quotepath-repro-strict`:
 - Yet the live page is still broken/reset: [`deepwiki.com/adames-cognition/quotepath-repro-strict`](https://deepwiki.com/adames-cognition/quotepath-repro-strict) — captured in [`evidence/08_strict_ui_state.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/08_strict_ui_state.log) and screenshot [`08_strict_ui_state.png`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/08_strict_ui_state.png)
 - Commit history showing the sparse, octal-quoted commits: [`quotepath-repro-strict/commits/main`](https://github.com/adames-cognition/quotepath-repro-strict/commits/main) — full commit log in [`evidence/01_strict_commits.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/01_strict_commits.log)
 
-## Why `!OVERVIEW.md` would fix it
+## Control test: `!OVERVIEW.md` tests the sort/anchor theory
 
-I added `!OVERVIEW.md` to the strict repo ([commit `f4ee4f3`](https://github.com/adames-cognition/quotepath-repro-strict/commit/f4ee4f3); file [`!OVERVIEW.md`](https://github.com/adames-cognition/quotepath-repro-strict/blob/main/%21OVERVIEW.md)). `!` is ASCII `0x21`, which sorts before the `"` (`0x22`) that starts every quoted path. If this hypothesis is right, re-indexing with that file present should give generation a recognizable anchor and let it succeed — while still dropping the Japanese files. The re-index needs one manual click on the DeepWiki page (reCAPTCHA blocks automation); the aborted programmatic attempt is in [`evidence/09_control_trigger.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/09_control_trigger.log) and did not confirm whether the submission fired.
+I added `!OVERVIEW.md` to the strict repo ([commit `f4ee4f3`](https://github.com/adames-cognition/quotepath-repro-strict/commit/f4ee4f3); file [`!OVERVIEW.md`](https://github.com/adames-cognition/quotepath-repro-strict/blob/main/%21OVERVIEW.md)). `!` is ASCII `0x21`, which sorts before the `"` (`0x22`) that starts every quoted path. Re-indexing should expose whether the failure is really about the pipeline being unable to find any real-file anchor:
 
-## Fix direction
+- **If the wiki now generates but only cites `!OVERVIEW.md`**, it confirms the silent-omission mechanism: one ASCII-sorted anchor is enough to rescue generation, and every Japanese file is still dropped.
+- **If the wiki still fails**, the simple sort/anchor theory is incomplete — something else (e.g. how the clusterer handles *all* quoted paths, not just their sort order) is also breaking generation.
+
+Either outcome narrows the actual bug. The control commit is already in the repo; only the re-index is pending.
+
+## Potential Fix direction (just spitballing)
 
 1. Run git with `-c core.quotePath=false` (or `-z`) wherever file paths are read.
 2. If you must keep quoted output, unescape `"\xxx\yyy..."` paths before matching against disk.
