@@ -17,6 +17,8 @@ The observed behavior is consistent with DeepWiki consuming git path output with
 
 ## The smoking gun
 
+**Evidence:** raw escaping comparison [`evidence/02_strict_escaping.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/02_strict_escaping.log); char analysis [`evidence/05_char_analysis.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/05_char_analysis.log) + script [`char_analysis.py`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/char_analysis.py)
+
 Clone the strict repo and run these two commands:
 
 ```sh
@@ -35,13 +37,13 @@ The quoted strings start with `"` (ASCII `0x22`). That makes them sort before an
 
 For `quotepath-repro-strict`:
 
-- Status endpoint went `unknown → indexing → completed`: [`api.devin.ai/ada/public_repo_indexing_status?repo_name=adames-cognition%2Fquotepath-repro-strict`](https://api.devin.ai/ada/public_repo_indexing_status?repo_name=adames-cognition%2Fquotepath-repro-strict)
-- Yet the live page is still broken/reset: [`deepwiki.com/adames-cognition/quotepath-repro-strict`](https://deepwiki.com/adames-cognition/quotepath-repro-strict)
-- Commit history showing the sparse, octal-quoted commits: [`quotepath-repro-strict/commits/main`](https://github.com/adames-cognition/quotepath-repro-strict/commits/main)
+- Status endpoint went `unknown → indexing → completed`: [`api.devin.ai/ada/public_repo_indexing_status?repo_name=adames-cognition%2Fquotepath-repro-strict`](https://api.devin.ai/ada/public_repo_indexing_status?repo_name=adames-cognition%2Fquotepath-repro-strict) — timestamped poll in [`evidence/04_strict_status_poll.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/04_strict_status_poll.log)
+- Yet the live page is still broken/reset: [`deepwiki.com/adames-cognition/quotepath-repro-strict`](https://deepwiki.com/adames-cognition/quotepath-repro-strict) — captured in [`evidence/08_strict_ui_state.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/08_strict_ui_state.log) and screenshot [`08_strict_ui_state.png`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/08_strict_ui_state.png)
+- Commit history showing the sparse, octal-quoted commits: [`quotepath-repro-strict/commits/main`](https://github.com/adames-cognition/quotepath-repro-strict/commits/main) — full commit log in [`evidence/01_strict_commits.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/01_strict_commits.log)
 
 ## Why `!OVERVIEW.md` would fix it
 
-I added `!OVERVIEW.md` to the strict repo ([commit `f4ee4f3`](https://github.com/adames-cognition/quotepath-repro-strict/commit/f4ee4f3)). `!` is ASCII `0x21`, which sorts before the `"` (`0x22`) that starts every quoted path. If this hypothesis is right, re-indexing with that file present should give generation a recognizable anchor and let it succeed — while still dropping the Japanese files. The re-index needs one manual click on the DeepWiki page (reCAPTCHA blocks automation); the aborted programmatic attempt at 14:20 did not confirm whether the submission fired.
+I added `!OVERVIEW.md` to the strict repo ([commit `f4ee4f3`](https://github.com/adames-cognition/quotepath-repro-strict/commit/f4ee4f3); file [`!OVERVIEW.md`](https://github.com/adames-cognition/quotepath-repro-strict/blob/main/%21OVERVIEW.md)). `!` is ASCII `0x21`, which sorts before the `"` (`0x22`) that starts every quoted path. If this hypothesis is right, re-indexing with that file present should give generation a recognizable anchor and let it succeed — while still dropping the Japanese files. The re-index needs one manual click on the DeepWiki page (reCAPTCHA blocks automation); the aborted programmatic attempt is in [`evidence/09_control_trigger.log`](https://github.com/adames-cognition/quotepath-repro-report/blob/main/evidence/09_control_trigger.log) and did not confirm whether the submission fired.
 
 ## Fix direction
 
