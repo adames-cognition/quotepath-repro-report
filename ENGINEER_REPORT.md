@@ -6,14 +6,14 @@
 
 ## In one sentence
 
-DeepWiki reads git path output with `core.quotePath=true` (the default). Non-ASCII filenames come out wrapped in `"` and octal-escaped, so they never match real files on disk, and the wiki either silently ignores them or fails outright.
+The observed behavior is consistent with DeepWiki consuming git path output with `core.quotePath=true` (the default). Non-ASCII filenames come out wrapped in `"` and octal-escaped, so they don't match real files on disk, and the wiki either silently ignores them or fails outright.
 
 ## Two failure modes
 
 | Scenario | Repo | What happens |
 |---|---|---|
 | Some ASCII files exist | [`quotepath-repro`](https://github.com/adames-cognition/quotepath-repro) (15 Japanese files + `main.py`/`utils.py`) | Wiki generates, but only cites the ASCII files. Japanese docs become [empty pages](https://deepwiki.com/adames-cognition/quotepath-repro/2-system-design). |
-| No ASCII files exist | [`quotepath-repro-strict`](https://github.com/adames-cognition/quotepath-repro-strict) (Japanese only) | Backend says `completed`, but the UI resets to "Repository Not Indexed" — the `WikiGenerationEmptyError` symptom. |
+| No ASCII files exist | [`quotepath-repro-strict`](https://github.com/adames-cognition/quotepath-repro-strict) (Japanese only) | Backend says `completed`, but the UI resets to "Repository Not Indexed". This matches the `WikiGenerationEmptyError` signature described in the original issue. |
 
 ## The smoking gun
 
@@ -29,7 +29,7 @@ git -c core.quotePath=false ls-files
 # 設計書_画面一覧.xlsx
 ```
 
-The quoted strings start with `"` (ASCII `0x22`). That makes them sort before any normal filename, so they dominate the top of the file list even though they don't exist on disk. The `343202` fragment in the reported warning is literally the octal form of the UTF-8 bytes `0xE3 0x82` — the cluster IDs are being built from the quoted names. ([analysis script](https://github.com/adames-cognition/quotepath-repro-report/blob/main/char_analysis.py))
+The quoted strings start with `"` (ASCII `0x22`). That makes them sort before any normal filename, so they dominate the top of the file list even though they don't exist on disk. The `343202` fragment in the reported warning is the octal form of UTF-8 bytes `0xE3 0x82` (the lead bytes of Japanese katakana). Our reproduction did not emit that exact warning, but the byte math lines up with how a pipeline using the quoted path could build cluster IDs from the escaped string. ([analysis script](https://github.com/adames-cognition/quotepath-repro-report/blob/main/char_analysis.py))
 
 ## Hard failure captured
 
@@ -41,7 +41,7 @@ For `quotepath-repro-strict`:
 
 ## Why `!OVERVIEW.md` would fix it
 
-I added `!OVERVIEW.md` to the strict repo ([commit `f4ee4f3`](https://github.com/adames-cognition/quotepath-repro-strict/commit/f4ee4f3)). `!` is ASCII `0x21`, which sorts before the `"` (`0x22`) that starts every quoted path. Once that file is indexed, generation has a recognizable anchor and should succeed — while still dropping the Japanese files. The re-index just needs one manual click on the DeepWiki page (reCAPTCHA blocks automation).
+I added `!OVERVIEW.md` to the strict repo ([commit `f4ee4f3`](https://github.com/adames-cognition/quotepath-repro-strict/commit/f4ee4f3)). `!` is ASCII `0x21`, which sorts before the `"` (`0x22`) that starts every quoted path. If this hypothesis is right, re-indexing with that file present should give generation a recognizable anchor and let it succeed — while still dropping the Japanese files. The re-index needs one manual click on the DeepWiki page (reCAPTCHA blocks automation); the aborted programmatic attempt at 14:20 did not confirm whether the submission fired.
 
 ## Fix direction
 
