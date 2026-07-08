@@ -1,0 +1,28 @@
+--- api.devin.ai calls ---
+GET 200 https://api.devin.ai/ada/public_repo_indexing_status?repo_name=adames-cognition%2Fquotepath-repro-strict
+  BODY: {"status":"completed"}
+
+--- rendered body text (first 1200 chars) ---
+DeepWiki
+
+adames-cognition/quotepath-repro-strict
+
+Index your code with
+Devin
+Share
+quotepath-repro-strict
+adames-cognition/quotepath-repro-strict
+
+Strict repro: only Japanese (octal-escaped) filenames - DeepWiki hard failure
+
+Python
+Updated: Jul 8, 2026
+Repository Not Indexed
+
+This repository hasn't been indexed yet. Indexing allows you to explore code structure, find documentation, and understand dependencies.
+
+Indexing typically takes 2-10 minutes to complete after it starts indexing
+
+Index Repository
+
+Once indexed, you'll have full access to code exploration and search functionality

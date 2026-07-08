@@ -1,0 +1,16 @@
+real name          : 設計書_画面一覧.xlsx
+utf8 bytes (hex)   : e8 a8 ad e8 a8 88 e6 9b b8 5f e7 94 bb e9 9d a2 e4 b8 80 e8 a6 a7 2e 78 6c 73 78
+git-quoted display : "\350\250\255\350\250\210\346\233\270_\347\224\273\351\235\242\344\270\200\350\246\247.xlsx"
+first char of quoted string: '"' ASCII 34 0x22
+
+ASCII sort order: '!'=33  '"'=34  '0'=48  'A'=65  'a'=97
+=> any quoted path (leading 0x22) sorts BEFORE all alphanumeric names,
+   and AFTER only space(0x20) and !(0x21) -- hence the !OVERVIEW.md control works.
+
+cluster-id fragment check ('343202' from warning 'cluster-...343202...xlsx-...'):
+  設計書_画面一覧.xlsx: octal-concat contains '343202' = False
+  テスト計画書.md: octal-concat contains '343202' = True
+    at octal-digit offset 9; 343 202 = bytes 0xE3 0x82 (start of Japanese kana/UTF-8 lead)
+  メイン処理.py: octal-concat contains '343202' = True
+    at octal-digit offset 9; 343 202 = bytes 0xE3 0x82 (start of Japanese kana/UTF-8 lead)
+  海上入出荷実績_設計書.md: octal-concat contains '343202' = False
